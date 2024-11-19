@@ -25,16 +25,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $categories = [
-            'Komik Strip',
-            'Komik Buku',
-            'Komik Humor dan Petualangan',
-            'Komik Biografi dan Ilmiah',
-            'Komik Edukasi',
-            'Komik Promosi (Iklan)',
-            'Komik Wayang',
-            'Komik Silat',
-            'Komik Tahunan',
-            'Komik online',
+            'Action', 'Fantasy', 'Mystery', 'Comedy'
         ];
 
         foreach ($categories as $category) {
@@ -43,11 +34,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('qwe'),
-        ]);
+        // User::create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        //     'email_verified_at' => now(),
+        //     'password' => Hash::make('qwe'),
+        // ]);
     }
 }

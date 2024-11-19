@@ -38,21 +38,34 @@
                             <div class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
                                 <a href="/detail/{{ $item->komik->id }}" class="text-base font-medium text-gray-900 hover:underline dark:text-white">{{ $item->komik->title }}</a>
             
-                                <div class="flex items-center gap-4">
-                                    <button type="button" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-white">
-                                    <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
-                                    </svg>
-                                    Tambah Wishlist
-                                    </button>
+                                <div class="flex items-center gap-2">
+                                    @if (in_array($item->komik->id, $wishlistItems))
+                                        <form action="{{ route('removeWishlist') }}" method="POST" class="inline-flex items-center">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="komik_id" value="{{ $item->komik->id }}">
+                                            <button type="submit" class="inline-flex items-center text-md font-medium text-red-500 hover:text-red-500 hover:underline ">
+                                                <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="red" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('addWishlist') }}" method="POST" class="inline-flex items-center">
+                                            @csrf
+                                            <input type="hidden" name="komik_id" value="{{ $item->komik->id }}">
+                                            <button type="submit" class="inline-flex items-center text-md font-medium text-gray-500 hover:text-gray-900 hover:underline ">
+                                                <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
                                     <form action="{{ route('cart.delete', $item->id) }}" method="POST" class="inline-flex">
                                         @method('delete')
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
-                                            <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
-                                            </svg>
-                                            Hapus
+                                        <button type="submit" class="inline-flex items-center text-md font-medium text-red-600 hover:underline dark:text-red-500">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 </div>

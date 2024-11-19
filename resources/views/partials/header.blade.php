@@ -8,11 +8,11 @@
                 </a>
                 <!-- Nav Links -->
                 <div class="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12 w-full justify-center">
-                    <span class="w-full md:w-2/3 h-10 bg-gray-200 cursor-pointer border border-gray-300 text-sm rounded-full flex">
+                    <form action="{{ route('search') }}" method="GET" class="w-full md:w-2/3 h-10 bg-gray-200 cursor-pointer border border-gray-300 text-sm rounded-full flex">
                         <input type="search" name="search" placeholder="Cari Komik"
-                        class="flex-grow px-4 rounded-l-full rounded-r-full text-sm text-black focus:outline-none w-full">
-                        <i class="fas fa-search m-3 mr-5 text-lg text-gray-700 w-4 h-4"></i>
-                    </span>
+                            class="flex-grow px-4 rounded-l-full rounded-r-full text-sm text-black focus:outline-none w-full" value="{{ request()->get('search') }}">
+                        <button type="submit"><i class="fas fa-search m-3 mr-5 text-lg text-gray-700 w-4 h-4"></i></button>
+                    </form>
                 </div>
                 <!-- Header Icons -->
                 <div class="hidden xl:flex items-center space-x-5 items-center">

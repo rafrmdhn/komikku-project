@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Komik;
+use App\Models\Category;
 use App\Models\Wishlist;
 use App\Models\Pembelian;
 use Illuminate\Http\Request;
@@ -28,9 +29,13 @@ class HomeController extends Controller
     public function detail(Request $request, $id){
         $detailKomik = Komik::where('id', $id)->first();
         $totalCart = 0;
+        $isInWishlist = false;
 
         if ($request->user()) {
             $totalCart = Cart::where('user_id', $request->user()->id)->count();
+            $isInWishlist = Wishlist::where('user_id', $request->user()->id)
+                ->where('komik_id', $id)
+                ->exists();
         }
 
         return view('detail', [
@@ -41,6 +46,7 @@ class HomeController extends Controller
             'harga' => $detailKomik->price,
             'gambar' => $detailKomik->photo,
             'total_cart' => $totalCart,
+            'isInWishlist' => $isInWishlist,
         ]);
     }
 
@@ -89,9 +95,12 @@ class HomeController extends Controller
 
     public function cart(Request $request){
         $cart = Cart::with('komik')->where('user_id', $request->user()->id)->get();
+        $wishlistItems = Wishlist::where('user_id', $request->user()->id)->pluck('komik_id')->toArray();
+
         return view('cart', [
             'cart' => $cart,
             'total_cart' => Cart::where('user_id', $request->user()->id)->get()->count(),
+            'wishlistItems' => $wishlistItems,
         ]);
     }
 
@@ -112,7 +121,30 @@ class HomeController extends Controller
             'komik_id' => $komik_id,
         ]);
 
-        return redirect()->route('home');
+        $redirectRoute = $request->headers->get('referer');
+
+        if (strpos($redirectRoute, 'cart') !== false) {
+            return redirect()->route('cart')->with('status', 'Komik berhasil ditambahkan ke wishlist');
+        } else {
+            return redirect()->route('detail', ['id' => $komik_id])->with('status', 'Komik berhasil ditambahkan ke wishlist');
+        }
+    }
+
+    public function removeWishlist(Request $request)
+    {
+        $komik_id = $request->input('komik_id');
+
+        Wishlist::where('user_id', $request->user()->id)
+            ->where('komik_id', $komik_id)
+            ->delete();
+        
+        $redirectRoute = $request->headers->get('referer');
+
+        if (strpos($redirectRoute, 'cart') !== false) {
+            return redirect()->route('cart')->with('status', 'Komik berhasil dihapus dari wishlist');
+        } else {
+            return redirect()->route('detail', ['id' => $komik_id])->with('status', 'Komik berhasil dihapus dari wishlist');
+        }
     }
 
     public function checkout()
@@ -160,6 +192,51 @@ class HomeController extends Controller
 
         return view('payment', [
             'total_cart' => $totalCart,
+        ]);
+    }
+
+    public function listKomik(Request $request)
+    {
+        $totalCart = 0;
+
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        }
+
+        $query = Komik::query();
+
+        if ($request->has('kategori') && $request->kategori) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('name', $request->kategori);
+            });
+        }
+        
+        $data = [
+            'total_cart' => $totalCart,
+            'komiks' => $query->orderBy('title', 'asc')->get(),
+            'categories' => Category::all(),
+        ];
+
+        return view('list', $data);
+    }
+
+    public function search(Request $request)
+    {
+        $totalCart = 0;
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        }
+
+        $search = $request->get('search');
+        $komiks = Komik::where('title', 'like', '%' . $search . '%')
+                    ->orWhere('author', 'like', '%' . $search . '%') 
+                    ->get();
+        
+        return view('list', [
+            'komiks' => $komiks,
+            'search' => $search,
+            'total_cart' => $totalCart,
+            'categories' => Category::all(),
         ]);
     }
 }
