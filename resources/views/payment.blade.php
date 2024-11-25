@@ -23,15 +23,22 @@
   
                     <p class="text-sm tracking-wider text-gray-400 group-hover:text-gray-600">Unggah Bukti</p>
                   </div>
-                  <input type="file" class="opacity-0" />
+                  <form action="{{ route('process-payment') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="id" value="{{ $id_pembelian }}">
+                    <input type="file" class="opacity-0" name="bukti_tf" required />
                 </label>
               </div>
             </div>
           </div>
-          <button class="mx-auto block rounded-md border bg-blue-500 px-6 py-2 text-white outline-none">Submit</button>
+          <button type="submit" class="mx-auto block rounded-md border bg-blue-500 px-6 py-2 text-white outline-none">Submit</button>
+          </form>
         </div>
         <!-- Step Checkout -->
         <div class="mt-8 max-w-sm md:mt-0 md:ml-10 md:w-2/3">
+          <div class="mb-8">
+            <p>Pembayaran yang harus dibayar sebesar</p><b> Rp{{ number_format($total_harga, 0, ',', '.') }}</b>
+          </div>          
           <div class="relative flex pb-12">
             <div class="absolute inset-0 flex h-full w-10 items-center justify-center">
               <div class="pointer-events-none h-full w-1 bg-gray-200"></div>

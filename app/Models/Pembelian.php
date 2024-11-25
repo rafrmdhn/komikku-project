@@ -11,12 +11,12 @@ class Pembelian extends Model
 
     protected $guarded = ['id'];
 
-    public function komik()
+    public function detail_pembelians()
     {
-        return $this->belongsTo(Komik::class, 'komik_id');
+        return $this->hasMany(DetailPembelian::class);
     }
 
-    public function users()
+    public function user()
     {
         return $this->belongsTo(User::class, 'users_id');
     }

@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        Komik::factory(20)->create();
+
         // User::create([
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',

@@ -21,6 +21,11 @@ class Komik extends Model
         return $this->hasMany(Pembelian::class, 'komik_id');
     }
 
+    public function detail_pembelians()
+    {
+        return $this->hasMany(DetailPembelian::class);
+    }
+
     public function cart()
     {
         return $this->hasMany(Cart::class);

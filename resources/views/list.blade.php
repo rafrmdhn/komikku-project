@@ -14,8 +14,8 @@
         </div>
         <h2 class="text-xl font-bold mb-4">Daftar Komik</h2>
     @endif
-    <div class="grid grid-cols-2 gap-6">
-        @forelse ($komiks as $komik)
+    <div class="grid grid-cols-2 gap-6 mb-6">
+        @foreach ($komiks as $komik)
             <a href="/detail/{{ $komik->id }}" class="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 ease-in-out">
                 <div class="flex">
                     <div class="flex-shrink-0">
@@ -30,10 +30,9 @@
                     </div>
                 </div>
             </a>
-        @empty
-            <p class="col-span-full text-center text-gray-500">Tidak ada komik ditemukan.</p>
-        @endforelse
+        @endforeach
     </div>
+    {{ $komiks->links() }}
 </div>
 
 @endsection

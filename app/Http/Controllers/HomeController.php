@@ -5,24 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Komik;
 use App\Models\Category;
+use App\Models\DetailPembelian;
 use App\Models\Wishlist;
 use App\Models\Pembelian;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    public function home(Request $request){
+    public function home(Request $request, $id = null){
         $totalCart = 0;
+        $wishlistKomikIds  = [];
 
         if ($request->user()) {
             $totalCart = Cart::where('user_id', $request->user()->id)->count();
+            $wishlistKomikIds  = Wishlist::where('user_id', $request->user()->id)
+                ->pluck('komik_id')
+                ->toArray();
         }
 
         return view('home', [
-            'komik_populer' => Komik::all(),
+            'komik_populer' => Komik::limit(7)->get(),
             'total_cart' => $totalCart,
+            'recommends' => Komik::orderBy('publication_year', 'desc')->limit(4)->get(),
+            'wishlistKomikIds' => $wishlistKomikIds,
         ]);
     }
 
@@ -30,13 +38,22 @@ class HomeController extends Controller
         $detailKomik = Komik::where('id', $id)->first();
         $totalCart = 0;
         $isInWishlist = false;
+        $wishlistKomikIds  = [];
 
         if ($request->user()) {
             $totalCart = Cart::where('user_id', $request->user()->id)->count();
             $isInWishlist = Wishlist::where('user_id', $request->user()->id)
                 ->where('komik_id', $id)
                 ->exists();
+            $wishlistKomikIds  = Wishlist::where('user_id', $request->user()->id)
+                ->pluck('komik_id')
+                ->toArray();
         }
+
+        $recommend_komiks = Komik::where('category_id', $detailKomik->category_id)
+            ->where('id', '!=', $id)
+            ->limit(4)
+            ->get();
 
         return view('detail', [
             'id' => $detailKomik->id,
@@ -47,6 +64,8 @@ class HomeController extends Controller
             'gambar' => $detailKomik->photo,
             'total_cart' => $totalCart,
             'isInWishlist' => $isInWishlist,
+            'recommend_komiks' => $recommend_komiks,
+            'wishlistKomikIds' => $wishlistKomikIds,
         ]);
     }
 
@@ -96,11 +115,18 @@ class HomeController extends Controller
     public function cart(Request $request){
         $cart = Cart::with('komik')->where('user_id', $request->user()->id)->get();
         $wishlistItems = Wishlist::where('user_id', $request->user()->id)->pluck('komik_id')->toArray();
+        $wishlistKomikIds = [];
+
+        $wishlistKomikIds = Wishlist::where('user_id', $request->user()->id)
+            ->pluck('komik_id')
+            ->toArray();
 
         return view('cart', [
             'cart' => $cart,
             'total_cart' => Cart::where('user_id', $request->user()->id)->get()->count(),
             'wishlistItems' => $wishlistItems,
+            'komiks' => Komik::inRandomOrder()->limit(3)->get(),
+            'wishlistKomikIds' => $wishlistKomikIds,
         ]);
     }
 
@@ -121,13 +147,7 @@ class HomeController extends Controller
             'komik_id' => $komik_id,
         ]);
 
-        $redirectRoute = $request->headers->get('referer');
-
-        if (strpos($redirectRoute, 'cart') !== false) {
-            return redirect()->route('cart')->with('status', 'Komik berhasil ditambahkan ke wishlist');
-        } else {
-            return redirect()->route('detail', ['id' => $komik_id])->with('status', 'Komik berhasil ditambahkan ke wishlist');
-        }
+        return redirect()->to(url()->previous())->with('status', 'Komik berhasil ditambahkan ke wishlist');
     }
 
     public function removeWishlist(Request $request)
@@ -138,13 +158,7 @@ class HomeController extends Controller
             ->where('komik_id', $komik_id)
             ->delete();
         
-        $redirectRoute = $request->headers->get('referer');
-
-        if (strpos($redirectRoute, 'cart') !== false) {
-            return redirect()->route('cart')->with('status', 'Komik berhasil dihapus dari wishlist');
-        } else {
-            return redirect()->route('detail', ['id' => $komik_id])->with('status', 'Komik berhasil dihapus dari wishlist');
-        }
+        return redirect()->to(url()->previous())->with('status', 'Komik berhasil dihapus dari wishlist');
     }
 
     public function checkout()
@@ -152,8 +166,10 @@ class HomeController extends Controller
         $cartItems = Cart::where('user_id', Auth::id())->get();
         $totalPembayaran = 0;
 
-        $lastPembelian = Pembelian::orderBy('id_pembelian', 'desc')->first();
-        $currentIdPembelian = $lastPembelian ? $lastPembelian->id_pembelian + 1 : 1;
+        $lastPembelian = Pembelian::orderBy('id', 'desc')->first();
+        $currentInvoiceNumber = $lastPembelian
+            ? 'INV/' . Carbon::now()->format('Ymd') . '/KMK/' . ($lastPembelian->id + 1)
+            : 'INV/' . Carbon::now()->format('Ymd') . '/KMK/1';
 
         foreach ($cartItems as $cartItem) {
             $komik = Komik::find($cartItem->komik_id);
@@ -161,38 +177,73 @@ class HomeController extends Controller
             $totalPembayaran += $itemTotalPembayaran;
         }
 
+        $pembelian = Pembelian::create([
+            'users_id' => Auth::id(),
+            'tanggal_pembelian' => now(),
+            'total_pembayaran' => $totalPembayaran,
+            'status' => 'Proses',
+            'bukti_tf' => null,
+            'invoice_number' => $currentInvoiceNumber,
+        ]);
+
         foreach ($cartItems as $cartItem) {
             $komik = Komik::find($cartItem->komik_id);
-            $itemTotalPembayaran = $komik->price * $cartItem->jumlah;
-            
-            Pembelian::create([
-                'users_id' => Auth::id(),
+
+            if ($komik->stock < $cartItem->jumlah) {
+                return back()->with('error', "Stok untuk komik {$komik->title} tidak mencukupi.");
+            }
+
+            DetailPembelian::create([
+                'pembelian_id' => $pembelian->id,
                 'komik_id' => $cartItem->komik_id,
-                'jumlah_pembelian' => $cartItem->jumlah,
-                'tanggal_pembelian' => now(),
-                'total_pembayaran' => $itemTotalPembayaran,
-                'status' => 'Proses',
-                'bukti_tf' => null,
-                'id_pembelian' => $currentIdPembelian,
+                'jumlah' => $cartItem->jumlah
             ]);
+
+            $komik->stock -= $cartItem->jumlah;
+            $komik->save();
         }
 
         Cart::where('user_id', Auth::id())->delete();
 
-        return redirect()->route('home')->with('success', 'Pembelian berhasil dilakukan');
+        return redirect()->route('payment', ['id' => $pembelian->id]);
     }
 
-    public function payment(Request $request)
+    public function payment(Request $request, $id)
     {
-        $totalCart = 0;
+        $pembelian = Pembelian::with('detail_pembelians')->where('id', $id)->first();
 
-        if ($request->user()) {
-            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        if (!$pembelian) {
+            return redirect()->route('home')->with('error', 'Pembayaran tidak ditemukan atau sudah selesai.');
         }
+
+        $totalCart = Cart::where('user_id', $request->user()->id)->count();
 
         return view('payment', [
             'total_cart' => $totalCart,
+            'id_pembelian' => $id,
+            'total_harga' => $pembelian->total_pembayaran,
         ]);
+    }
+
+    public function processPayment(Request $request)
+    {
+        $request->validate([
+            'bukti_tf' => 'required|file|mimes:jpg,png,jpeg,pdf|max:2048',
+        ]);
+
+        if ($request->hasFile('bukti_tf')) {
+            $file = $request->file('bukti_tf');
+            $filePath = $file->store('images/bukti_tf', 'public');
+
+            Pembelian::where('id', $request->id)->update([
+                'status' => 'Menunggu Verifikasi',
+                'bukti_tf' => $filePath,
+            ]);
+
+            return redirect()->route('home')->with('success', 'Pembayaran berhasil, tunggu verifikasi.');
+        }
+
+        return back()->with('error', 'Terjadi kesalahan saat mengunggah bukti pembayaran.');
     }
 
     public function listKomik(Request $request)
@@ -213,7 +264,7 @@ class HomeController extends Controller
         
         $data = [
             'total_cart' => $totalCart,
-            'komiks' => $query->orderBy('title', 'asc')->get(),
+            'komiks' => $query->orderBy('title', 'asc')->paginate(10),
             'categories' => Category::all(),
         ];
 
@@ -237,6 +288,55 @@ class HomeController extends Controller
             'search' => $search,
             'total_cart' => $totalCart,
             'categories' => Category::all(),
+        ]);
+    }
+
+    public function orderList(Request $request)
+    {
+        $totalCart = 0;
+
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+            $orders =  Pembelian::with('user', 'detail_pembelians')
+            ->where('users_id', $request->user()->id )
+            ->get();
+        }
+
+        return view('orderlist', [
+            'total_cart' => $totalCart,
+            'orders' => $orders,
+        ]);
+    }
+
+    public function newestList(Request $request)
+    {
+        $totalCart = 0;
+
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        }
+
+        return view('newest', [
+            'total_cart' => $totalCart,
+            'komiks' => Komik::orderBy('created_at', 'desc')->take(15)->get(),
+        ]);
+    }
+
+    public function wishList(Request $request)
+    {
+        $totalCart = 0;
+
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        }
+
+        $wishlistItems = Wishlist::where('user_id', $request->user()->id)
+            ->with('komik') 
+            ->get();
+
+        return view('wishlist', [
+            'total_cart' => $totalCart,
+            'wishlists' => $wishlistItems,
         ]);
     }
 }

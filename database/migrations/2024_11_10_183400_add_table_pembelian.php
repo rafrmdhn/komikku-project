@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pembelians', function (Blueprint $table) {
-            $table->integer('id_pembelian')->after('id');
-            $table->enum('status', ['Proses', 'Sukses'])->after('total_pembayaran');
+            $table->string('invoice_number')->after('id');
+            $table->enum('status', ['Proses', 'Menunggu Verifikasi', 'Sukses'])->after('total_pembayaran');
             $table->string('bukti_tf')->nullable()->after('status');
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pembelians', function (Blueprint $table) {
-            $table->dropColumn('id_pembelian');
+            $table->dropColumn('invoice_number');
             $table->dropColumn('status');
             $table->dropColumn('bukti_tf');
         });

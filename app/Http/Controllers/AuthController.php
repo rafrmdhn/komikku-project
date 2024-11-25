@@ -45,7 +45,7 @@ class AuthController extends Controller
  
         session()->regenerateToken();
  
-        return redirect('/flogin');
+        return redirect('/');
     }
 
     public function showRegisterForm()
