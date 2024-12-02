@@ -64,7 +64,7 @@
                 <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">{{ $nama_komik }}</h1>
                 <div class="flex mb-4">
                     <span class="flex items-center">
-                        <span class="text-gray-600">4 Terjual</span>
+                        {{-- <span class="text-gray-600">4 Terjual</span> --}}
                     </span>
                 </div>
                 <p class="leading-relaxed pb-5">{{ $deskripsi }}</p>
@@ -105,7 +105,7 @@
     <div class="container">
         <div class="flex flex-wrap justify-center -mx-4">
             <div class="w-full px-4">
-                <div class="text-center mx-auto mb-[60px] lg:mb-20 max-w-[510px]">
+                <div class="text-center mx-auto mb-[60px] lg:mb-10 max-w-[510px]">
                     <h2 class="font-bold text-3xl sm:text-4xl md:text-[40px] text-dark">
                     Rekomendasi Komik
                     </h2>
@@ -118,8 +118,8 @@
                 <div class="max-w-[370px] mx-auto mb-10">
                     <div class="space-y-6 overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <a href="/detail/{{ $item->id }}" class="overflow-hidden rounded">
-                            <img class="mx-auto h-44 w-44 dark:hidden" src="{{ asset($item->photo) }}" alt="{{ $item->title }}" />
-                            <img class="mx-auto hidden h-44 w-44 dark:block" src="{{ asset($item->photo) }}" alt="{{ $item->title }}" />
+                            <img class="mx-auto h-64 w-44 dark:hidden" src="{{ asset($item->photo) }}" alt="{{ $item->title }}" />
+                            <img class="mx-auto hidden h-64 w-44 dark:block" src="{{ asset($item->photo) }}" alt="{{ $item->title }}" />
                         </a>
                         <div>
                             <a href="/detail/{{ $item->id }}" class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white">{{ $item->title }}</a>
@@ -143,7 +143,7 @@
                                         </svg>
                                     </button>
                                     <div id="favourites-tooltip-3" role="tooltip" class="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700">
-                                        Add to favourites
+                                        Tambah ke wishlist
                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                     </div>
                                 </form>
@@ -157,7 +157,7 @@
                                         </svg>
                                     </button>
                                     <div id="favourites-tooltip-3" role="tooltip" class="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700">
-                                        Add to favourites
+                                        Tambah ke wishlist
                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                     </div>
                                 </form>
@@ -171,7 +171,7 @@
                                     <svg class="-ms-2 me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7h-1M8 7h-.688M13 5v4m-2-2h4" />
                                     </svg>
-                                    Add to cart
+                                    Tambah ke Keranjang
                                 </button>
                             </form>
                         </div>

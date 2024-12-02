@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\BillingController;
 use App\Http\Controllers\admin\KomikController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
@@ -25,26 +26,30 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/cart', [HomeController::class, 'cart'])->name('cart');
-Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('detail');
-Route::post('/addCart', [HomeController::class, 'addCart'])->name('addCart')->middleware('auth');
-Route::post('/cart/update/{id}', [HomeController::class, 'updateQuantity']);
-Route::delete('/cart/delete/{id}', [HomeController::class, 'cartDestroy'])->name('cart.delete');
-Route::post('/addWishlist', [HomeController::class, 'addWishlist'])->name('addWishlist')->middleware('auth');
-Route::delete('/remove-wishlist', [HomeController::class, 'removeWishlist'])->name('removeWishlist');
-Route::post('/checkout', [HomeController::class, 'checkout'])->name('checkout');
-Route::get('/payment/{id}', [HomeController::class, 'payment'])->name('payment')->middleware('auth');
-Route::post('/process-payment', [HomeController::class, 'processPayment'])->name('process-payment')->middleware('auth');
-Route::get('/daftar-komik', [HomeController::class, 'listKomik'])->name('daftar.komik');
-Route::get('/search', [HomeController::class, 'search'])->name('search');
-Route::get('/order-list', [HomeController::class, 'orderList'])->name('orderList');
-Route::get('/komik-terbaru', [HomeController::class, 'newestList'])->name('komik.terbaru');
-Route::get('/wishlist', [HomeController::class, 'wishList'])->name('wishList');
+Route::get('/', [HomeController::class, 'home'])->name('home')->middleware('check.admin');
+Route::get('/cart', [HomeController::class, 'cart'])->name('cart')->middleware('check.admin');
+Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('detail')->middleware('check.admin');
+Route::post('/addCart', [HomeController::class, 'addCart'])->name('addCart')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::post('/cart/update/{id}', [HomeController::class, 'updateQuantity'])->middleware('check.admin');
+Route::delete('/cart/delete/{id}', [HomeController::class, 'cartDestroy'])->name('cart.delete')->middleware('check.admin');
+Route::post('/addWishlist', [HomeController::class, 'addWishlist'])->name('addWishlist')->middleware(['check.admin', 'role:Customer']);
+Route::delete('/remove-wishlist', [HomeController::class, 'removeWishlist'])->name('removeWishlist')->middleware('check.admin');
+Route::post('/checkout', [HomeController::class, 'checkout'])->name('checkout')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::get('/payment/{id}', [HomeController::class, 'payment'])->name('payment')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::post('/process-payment', [HomeController::class, 'processPayment'])->name('process-payment')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::get('/daftar-komik', [HomeController::class, 'listKomik'])->name('daftar.komik')->middleware('check.admin');
+Route::get('/search', [HomeController::class, 'search'])->name('search')->middleware('check.admin');
+Route::get('/order-list', [HomeController::class, 'orderList'])->name('orderList')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::post('order-list/cancel', [HomeController::class, 'cancelOrder'])->name('order.cancel')->middleware(['check.admin', 'role:Customer', 'auth']);
+Route::get('/komik-terbaru', [HomeController::class, 'newestList'])->name('komik.terbaru')->middleware('check.admin');
+Route::get('/wishlist', [HomeController::class, 'wishList'])->name('wishList')->middleware(['check.admin', 'role:Customer', 'auth']);
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-});
-Route::prefix('/admin')->name('admin.')->group(function () {
-    Route::resource('/products', KomikController::class)->names('products');
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    Route::prefix('/admin')->name('admin.')->group(function () {
+        Route::resource('/products', KomikController::class)->names('products');
+        Route::resource('/billings', BillingController::class)->names('billings');
+    });
 });

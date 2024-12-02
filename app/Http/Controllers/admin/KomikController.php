@@ -52,6 +52,7 @@ class KomikController extends Controller
             'isbn' => 'required',
             'description' => 'required',
             'price' => 'required',
+            'link_komik' => 'required',
             'photo' => 'image|file|max:2048',
         ]);
 
@@ -105,6 +106,7 @@ class KomikController extends Controller
             'isbn' => 'required',
             'description' => 'required',
             'price' => 'required',
+            'link_komik' => 'required',
             'photo' => 'image|file|max:2048',
         ]);
 

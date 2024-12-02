@@ -240,10 +240,10 @@ class HomeController extends Controller
                 'bukti_tf' => $filePath,
             ]);
 
-            return redirect()->route('home')->with('success', 'Pembayaran berhasil, tunggu verifikasi.');
+            return redirect()->route('home')->with('status', 'Pembayaran berhasil, tunggu verifikasi.');
         }
 
-        return back()->with('error', 'Terjadi kesalahan saat mengunggah bukti pembayaran.');
+        return back()->with('status', 'Terjadi kesalahan saat mengunggah bukti pembayaran.');
     }
 
     public function listKomik(Request $request)
@@ -281,7 +281,8 @@ class HomeController extends Controller
         $search = $request->get('search');
         $komiks = Komik::where('title', 'like', '%' . $search . '%')
                     ->orWhere('author', 'like', '%' . $search . '%') 
-                    ->get();
+                    ->paginate(10)
+                    ->appends(['search' => $search]);
         
         return view('list', [
             'komiks' => $komiks,
@@ -294,17 +295,30 @@ class HomeController extends Controller
     public function orderList(Request $request)
     {
         $totalCart = 0;
+        $wishlistKomikIds  = [];
 
         if ($request->user()) {
             $totalCart = Cart::where('user_id', $request->user()->id)->count();
             $orders =  Pembelian::with('user', 'detail_pembelians')
             ->where('users_id', $request->user()->id )
             ->get();
+            $wishlistKomikIds  = Wishlist::where('user_id', $request->user()->id)
+                ->pluck('komik_id')
+                ->toArray();
+        }
+
+        if (!$request->session()->has('random_recommends')) {
+            $randomKomik = Komik::inRandomOrder()->take(4)->get();
+            $request->session()->put('random_recommends', $randomKomik);
+        } else {
+            $randomKomik = $request->session()->get('random_recommends');
         }
 
         return view('orderlist', [
             'total_cart' => $totalCart,
             'orders' => $orders,
+            'wishlistKomikIds' => $wishlistKomikIds,
+            'recommends' => $randomKomik,
         ]);
     }
 
@@ -338,5 +352,23 @@ class HomeController extends Controller
             'total_cart' => $totalCart,
             'wishlists' => $wishlistItems,
         ]);
+    }
+
+    public function cancelOrder(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:pembelians,id'
+        ]);
+
+        $order = Pembelian::find($request->id);
+
+        if ($order->status === 'Selesai') {
+            return redirect()->back()->with('status', 'Pesanan sudah selesai dan tidak dapat dibatalkan.');
+        }
+
+        $order->status = 'Pengajuan Batal';
+        $order->save();
+
+        return redirect()->back()->with('status', 'Pengajuan pembatalan berhasil dilakukan.');
     }
 }

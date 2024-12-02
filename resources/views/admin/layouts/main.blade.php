@@ -16,7 +16,9 @@
     
     @include('admin.partials.navbar')
 
-    @include('admin.partials.header')
+    @if (!request()->routeIs('admin.dashboard', 'admin.billings.show'))
+        @include('admin.partials.header')    
+    @endif
 
     <div class="container max-w-full sm:ml-64 mt-2">
         @yield('container')

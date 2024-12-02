@@ -19,17 +19,26 @@ class AuthController extends Controller
 
     public function authenticate(Request $request)
     {
-        // dd($request->all());
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $intendedUrl = session()->pull('url.intended', '/');
-            return redirect()->intended($intendedUrl);
+            // Dapatkan user yang sedang login
+            $user = Auth::user();
+
+            // Redirect berdasarkan role
+            if ($user->hasRole('Admin')) {
+                return redirect('/admin/dashboard');
+            } elseif ($user->hasRole('Customer')) {
+                return redirect('/');
+            }
+
+            // Default redirect jika tidak ada role
+            return redirect('/')->with('error', 'Role tidak dikenali.');
         }
 
         return back()->with('loginError', 'Email atau Password salah!');
@@ -67,8 +76,10 @@ class AuthController extends Controller
             'password' => Hash::make($validatedData['password']),
         ]);
 
+        $user->assignRole('Customer');
+
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Registrasi berhasil! Anda telah login.');
+        return redirect('/')->with('status', 'Registrasi berhasil! Anda telah login.');
     }
 }

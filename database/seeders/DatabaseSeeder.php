@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Komik;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -34,13 +35,20 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Komik::factory(20)->create();
+        // Komik::factory(20)->create();
 
-        // User::create([
+        Role::firstOrCreate(['name' => 'Admin']);
+        Role::firstOrcreate(['name' => 'Customer']);
+
+        // $user = User::create([
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         //     'email_verified_at' => now(),
-        //     'password' => Hash::make('qwe'),
+        //     'password' => Hash::make('qweasdzxc'),
         // ]);
+
+        $user = User::where('email', 'test@example.com')->first();
+
+        $user->assignRole('Admin');
     }
 }

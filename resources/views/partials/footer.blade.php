@@ -3,32 +3,17 @@
         <nav class="flex flex-wrap justify-center -mx-5 -my-2">
             <div class="px-5 py-2">
                 <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    About
+                    Home
                 </a>
             </div>
             <div class="px-5 py-2">
                 <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    Blog
+                    News
                 </a>
             </div>
             <div class="px-5 py-2">
                 <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    Team
-                </a>
-            </div>
-            <div class="px-5 py-2">
-                <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    Pricing
-                </a>
-            </div>
-            <div class="px-5 py-2">
-                <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    Contact
-                </a>
-            </div>
-            <div class="px-5 py-2">
-                <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                    Terms
+                    List
                 </a>
             </div>
         </nav>
@@ -65,7 +50,7 @@
             </a>
         </div>
         <p class="mt-8 text-base leading-6 text-center text-gray-400">
-            © 2024 KomikKu, Inc. All rights reserved.
+            © 2024 Komikku, Inc. All rights reserved.
         </p>
     </div>
 </section>

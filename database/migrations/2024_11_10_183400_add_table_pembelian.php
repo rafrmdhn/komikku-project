@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('pembelians', function (Blueprint $table) {
             $table->string('invoice_number')->after('id');
-            $table->enum('status', ['Proses', 'Menunggu Verifikasi', 'Sukses'])->after('total_pembayaran');
+            $table->enum('status', ['Proses', 'Menunggu Verifikasi', 'Sukses', 'Pengajuan Batal', 'Batal'])->after('total_pembayaran');
             $table->string('bukti_tf')->nullable()->after('status');
         });
     }
