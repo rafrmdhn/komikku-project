@@ -20,8 +20,8 @@
          opacity: 0;
          top: -100px;  /* Toast menghilang kembali ke atas */
      }
- </style>
- @if (session('status'))
+</style>
+@if (session('status'))
      <div id="toast-undo" class="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800 hide" role="alert">
          <div class="text-sm font-normal">
              {{ session('status') }}
@@ -32,7 +32,7 @@
              </button>
          </div>
      </div>
- @endif
+@endif
 <section class="py-24 relative">
     <div class="w-full max-w-7xl mx-auto px-4 md:px-8">
         <h2 class="font-manrope font-extrabold text-3xl lead-10 text-black mb-9">Daftar Transaksi</h2>

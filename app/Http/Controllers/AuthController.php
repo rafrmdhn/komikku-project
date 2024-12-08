@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Cart;
 
 class AuthController extends Controller
 {
@@ -81,5 +82,39 @@ class AuthController extends Controller
         Auth::login($user);
 
         return redirect('/')->with('status', 'Registrasi berhasil! Anda telah login.');
+    }
+
+    public function profile(Request $request)
+    {
+        $totalCart = 0;
+
+        if ($request->user()) {
+            $totalCart = Cart::where('user_id', $request->user()->id)->count();
+        }
+
+        return view('profile', [
+            'total_cart' => $totalCart,
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'password' => 'nullable|confirmed|min:8',
+        ]);
+
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return redirect()->back()->with('status', 'Profil berhasil diupdate!');
     }
 }

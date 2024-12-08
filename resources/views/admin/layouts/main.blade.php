@@ -16,7 +16,7 @@
     
     @include('admin.partials.navbar')
 
-    @if (!request()->routeIs('admin.dashboard', 'admin.billings.show'))
+    @if (!request()->routeIs('admin.dashboard', 'admin.billings.show', 'admin.profile.index'))
         @include('admin.partials.header')    
     @endif
 

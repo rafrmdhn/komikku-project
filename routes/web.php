@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\admin\BillingController;
+use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\KomikController;
+use App\Http\Controllers\admin\ProfileController;
+use App\Http\Controllers\admin\UserContoller;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +31,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('/', [HomeController::class, 'home'])->name('home')->middleware('check.admin');
+Route::get('/profile', [AuthController::class, 'profile'])->name('profile')->middleware('check.admin');
+Route::put('/profile/update', [AuthController::class, 'update'])->name('profile.update');
 Route::get('/cart', [HomeController::class, 'cart'])->name('cart')->middleware('check.admin');
 Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('detail')->middleware('check.admin');
 Route::post('/addCart', [HomeController::class, 'addCart'])->name('addCart')->middleware(['check.admin', 'role:Customer', 'auth']);
@@ -45,11 +51,11 @@ Route::get('/komik-terbaru', [HomeController::class, 'newestList'])->name('komik
 Route::get('/wishlist', [HomeController::class, 'wishList'])->name('wishList')->middleware(['check.admin', 'role:Customer', 'auth']);
 
 Route::middleware(['auth', 'role:Admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
     Route::prefix('/admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('/products', KomikController::class)->names('products');
         Route::resource('/billings', BillingController::class)->names('billings');
+        Route::resource('/users', UserContoller::class)->names('users');
+        Route::resource('/profile', ProfileController::class)->names('profile');
     });
 });
