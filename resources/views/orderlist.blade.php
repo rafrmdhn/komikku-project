@@ -60,12 +60,14 @@
                         <p class="font-medium text-lg leading-8 text-black whitespace-nowrap">Order : {{ $item->invoice_number }}</p>
                         <p class="font-medium text-lg leading-8 text-black mt-3 whitespace-nowrap">Order Payment : {{ \Carbon\Carbon::parse($item->tanggal_pembelian)->format('d M Y') }}</p>
                     </div>
-                    <div class="flex items-center gap-3 max-md:mt-5">
-                        <button
-                            class="rounded-full px-7 py-3 bg-white text-gray-900 border border-gray-300 font-semibold text-sm shadow-sm shadow-transparent transition-all duration-500 hover:shadow-gray-200 hover:bg-gray-50 hover:border-gray-400">Show
-                            Invoice</button>
+                    @if ($item->status == 'Sukses')
+                        <div class="flex items-center gap-3 max-md:mt-5">
+                            <a href="{{ $item->detail_pembelians->first()->komik->link_komik }}"
+                                class="rounded-full px-7 py-3 bg-white text-gray-900 border border-gray-300 font-semibold text-sm shadow-sm shadow-transparent transition-all duration-500 hover:shadow-gray-200 hover:bg-gray-50 hover:border-gray-400">Lihat Komik
+                            </a>
 
-                    </div>
+                        </div>
+                    @endif
                 </div>
                 
                 @foreach ($item->detail_pembelians as $detail_pembelian)
@@ -121,16 +123,18 @@
 
                 <div class="pr-3 md:pr-11 flex items-center justify-between max-sm:flex-col-reverse">
                     <div class="flex max-sm:flex-col-reverse items-center">
-                        <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
-                            class="flex items-center gap-3 py-10 pr-8 pl-7 sm:border-r border-gray-300 font-normal text-xl leading-8 text-gray-500 group transition-all duration-500 hover:text-indigo-600">
-                            <svg width="40" height="41" viewBox="0 0 40 41" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path class="stroke-gray-600 transition-all duration-500 group-hover:stroke-indigo-600"
-                                    d="M14.0261 14.7259L25.5755 26.2753M14.0261 26.2753L25.5755 14.7259" stroke=""
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            Batal Order
-                        </button>
+                        @if ($item->status != "Sukses")
+                            <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
+                                class="flex items-center gap-3 py-10 pr-8 pl-7 sm:border-r border-gray-300 font-normal text-xl leading-8 text-gray-500 group transition-all duration-500 hover:text-indigo-600">
+                                <svg width="40" height="41" viewBox="0 0 40 41" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path class="stroke-gray-600 transition-all duration-500 group-hover:stroke-indigo-600"
+                                        d="M14.0261 14.7259L25.5755 26.2753M14.0261 26.2753L25.5755 14.7259" stroke=""
+                                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Batal Order
+                            </button>
+                        @endif
                         <div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                             <div class="relative p-4 w-full max-w-md max-h-full">
                                 <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
