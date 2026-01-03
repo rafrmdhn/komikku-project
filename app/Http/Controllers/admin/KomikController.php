@@ -57,8 +57,8 @@ class KomikController extends Controller
         ]);
 
         if($request->file('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('images/komik');
-        }        
+            $validatedData['photo'] = $request->file('photo')->store('images/komik', 'public');
+        }
 
         $validatedData['publication_year'] = $validatedData['publication_year'] . '-01';
 
@@ -96,10 +96,10 @@ class KomikController extends Controller
     public function update(Request $request, $id)
     {
         $komik = Komik::findOrFail($id);
-        
+
         $validatedData = $request->validate([
             'title' => 'required',
-            'author' => 'required', 
+            'author' => 'required',
             'category_id' => 'required',
             'publication_year' => 'required',
             'stock' => 'required',
@@ -114,7 +114,7 @@ class KomikController extends Controller
             if ($komik->photo && Storage::exists($komik->photo)) {
                 Storage::delete($komik->photo);
             }
-            $validatedData['photo'] = $request->file('photo')->store('images/komik');
+            $validatedData['photo'] = $request->file('photo')->store('images/komik', 'public');
         }
 
         $validatedData['publication_year'] = $validatedData['publication_year'] . '-01';
@@ -131,7 +131,8 @@ class KomikController extends Controller
     {
         $komik = Komik::findOrFail($id);
         $komik->delete();
-    
+        Storage::disk('public')->delete($komik->photo);
+
         return redirect()->route('admin.products.index')->with('success', 'Komik deleted successfully.');
     }
 }

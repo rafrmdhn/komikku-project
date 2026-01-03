@@ -12,9 +12,9 @@
     }
     #toast-undo {
         position: fixed;
-        top: -100px; 
+        top: -100px;
         left: 50%;
-        transform: translateX(-50%); 
+        transform: translateX(-50%);
         z-index: 9999;
         opacity: 0;
         transition: opacity 0.5s ease-in-out, top 0.5s ease-in-out;
@@ -22,12 +22,12 @@
 
     #toast-undo.show {
         opacity: 1;
-        top: 20px; 
+        top: 20px;
     }
 
     #toast-undo.hide {
         opacity: 0;
-        top: -100px; 
+        top: -100px;
     }
 </style>
 
@@ -54,8 +54,8 @@
             </a>
         </div>
         <div class="hidden lg:mt-0 lg:col-span-5 lg:flex">
-            <img src="storage/images/komik.png" alt="komik">
-        </div>                
+            <img src="{{ asset('img/cover.png') }}" alt="komik">
+        </div>
     </div>
 </section>
 
@@ -107,7 +107,7 @@
                         </a>
                     </div>
                 @endforeach
-            </div>            
+            </div>
         </div>
 </div>
 
@@ -169,7 +169,7 @@
                                         </div>
                                     </form>
                                 @endif
-                                
+
                                 <form action="{{ route('addCart') }}" method="POST">
                                     @csrf
                                     <input type="hidden" value="{{ $item->id }}" name="komik_id">
@@ -203,7 +203,7 @@
             setTimeout(function() {
                 toast.classList.remove('show');
                 toast.classList.add('hide');
-            }, 5000); 
+            }, 5000);
         });
     </script>
 @endif
